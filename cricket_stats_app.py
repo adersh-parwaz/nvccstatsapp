@@ -15,7 +15,7 @@ def main():
     # Apply custom CSS styles
     apply_custom_styles()
     
-    st.markdown("<h1 style='text-align: center; color: #FFA500; font-size:48px;'>NVCC Player Stats</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; color: #800000; font-size:64px;'>NVCC Player Stats</h1>", unsafe_allow_html=True)
 
     # Initialize session state variables
     if 'excel_file' not in st.session_state:
@@ -31,25 +31,24 @@ def main():
     if 'year_var' not in st.session_state:
         st.session_state.year_var = 'ALL TIME'
 
-    # Default stats
+    # Default stats (updated)
     default_stats = [
         "Matches", "Innings", "Runs", "High", "Not Out", "Avg",
-        "50s", "100s", "4s", "6s", "Ducks", "Catches", "Wickets",
+        "50s", "100s", "Ducks", "Catches", "Wickets", "C+RO+S",
         "Avg.1", "Econ", "SR", "Best", "Full Overs"
     ]
 
-    # Mapping of actual stat names to display names
+    # Mapping of actual stat names to display names (updated)
     stat_display_names = {
         'Avg': 'Batting Avg',
         'Avg.1': 'Bowling Avg',
         'Econ': 'Bowling Econ',
         'SR': 'Bowling SR',
-        '4s': 'Fours',
-        '6s': 'Sixes'
+        'C+RO+S': 'Catches+RunOuts+Stumpings'
     }
 
-    # Stats that need to be formatted to one decimal place
-    one_decimal_stats = {'Avg', 'Avg.1', 'Econ', 'SR'}
+    # Stats that need to be formatted to two decimal places
+    two_decimal_stats = {'Avg', 'Avg.1', 'Econ', 'SR'}
 
     # Add color options
     highlight_colors = {
@@ -141,12 +140,20 @@ def main():
 def apply_custom_styles():
     st.markdown("""
         <style>
+        /* Main content area */
+        [data-testid="stAppViewContainer"] {
+            background-color: #d3d3d3;
+        }
+        /* Sidebar */
+        [data-testid="stSidebar"] {
+            background-color: #bfbfbf;
+        }
         /* Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
         ::-webkit-scrollbar-track {
-            background: #f1f1f1; 
+            background: #e0e0e0; 
         }
         ::-webkit-scrollbar-thumb {
             background: #888; 
@@ -157,15 +164,12 @@ def apply_custom_styles():
         /* Headers */
         h1, h2, h3, h4, h5, h6 {
             font-size: 1.5em !important;
-        }
-        /* Sidebar */
-        .sidebar .sidebar-content {
-            background-color: #f0f2f6;
+            color: #333333;
         }
         /* Buttons */
         .stButton>button {
             color: white;
-            background-color: #3498db;
+            background-color: #333333;
             border-radius: 5px;
             font-size: 16px;
         }
@@ -178,10 +182,12 @@ def apply_custom_styles():
         /* Increase font size of input labels */
         label {
             font-size: 1.2em;
+            color: #333333;
         }
         /* Table font size */
         .dataframe th, .dataframe td {
             font-size: 1.1em;
+            color: #333333;
         }
         </style>
         """, unsafe_allow_html=True)
@@ -189,20 +195,22 @@ def apply_custom_styles():
 def player_comparison(session_state):
     st.markdown(f"<h2 style='color: #2c3e50; font-size:32px;'>{session_state.year_var} Career Analysis</h2>", unsafe_allow_html=True)
 
+    # Mapping of actual stat names to display names (updated)
     stat_display_names = {
         'Avg': 'Batting Avg',
         'Avg.1': 'Bowling Avg',
         'Econ': 'Bowling Econ',
         'SR': 'Bowling SR',
-        '4s': 'Fours',
-        '6s': 'Sixes'
+        'C+RO+S': 'Catches+RunOuts+Stumpings'
     }
 
-    one_decimal_stats = {'Avg', 'Avg.1', 'Econ', 'SR'}
+    two_decimal_stats = {'Avg', 'Avg.1', 'Econ', 'SR'}
 
     # Select Stats to Display
     with st.sidebar.expander("Select Stats to Display", expanded=False):
         available_stats = [col for col in session_state.stats_data.columns if col != 'Player']
+        # Update available_stats to include only stats present in the DataFrame
+        available_stats = [stat for stat in available_stats if stat in session_state.stats_data.columns]
         selected_stats = st.multiselect("Select Stats:", [stat_display_names.get(stat, stat) for stat in available_stats],
                                         default=[stat_display_names.get(stat, stat) for stat in session_state.selected_stats])
         # Map display names back to actual stat names
@@ -255,9 +263,9 @@ def player_comparison(session_state):
             player_data3 = session_state.stats_data[session_state.stats_data['Player'] == selected_player3]
             stats3 = player_data3.iloc[0] if not player_data3.empty else None
 
-        display_stats(stats1, stats2, stats3, session_state.selected_stats, stat_display_names, one_decimal_stats)
+        display_stats(stats1, stats2, stats3, session_state.selected_stats, stat_display_names, two_decimal_stats)
 
-def display_stats(stats1, stats2, stats3, selected_stats, stat_display_names, one_decimal_stats):
+def display_stats(stats1, stats2, stats3, selected_stats, stat_display_names, two_decimal_stats):
     cols = [col for col in [stats1, stats2, stats3] if col is not None]
     num_players = len(cols)
     if num_players == 0:
@@ -288,9 +296,9 @@ def display_stats(stats1, stats2, stats3, selected_stats, stat_display_names, on
             if stat_name == 'Best':
                 value = get_best_stat(stats)
             else:
-                value = stats[stat_name] if stat_name in stats else "N/A"
+                value = stats.get(stat_name, "N/A")
                 value = "N/A" if pd.isna(value) else value
-                if stat_name in one_decimal_stats:
+                if stat_name in two_decimal_stats:
                     value = format_value(value)
             values.append(value)
         data[display_stat_name] = values
@@ -308,7 +316,7 @@ def format_value(value):
             value = float(value)
             if pd.isna(value):
                 return "N/A"
-            return f"{value:.1f}"
+            return f"{value:.2f}"
         except (ValueError, TypeError):
             return "N/A"
     else:
@@ -333,11 +341,10 @@ def custom_report_generator(session_state):
         'Avg.1': 'Bowling Avg',
         'Econ': 'Bowling Econ',
         'SR': 'Bowling SR',
-        '4s': 'Fours',
-        '6s': 'Sixes'
+        'C+RO+S': 'Catches+RunOuts+Stumpings'
     }
 
-    one_decimal_stats = {'Avg', 'Avg.1', 'Econ', 'SR'}
+    two_decimal_stats = {'Avg', 'Avg.1', 'Econ', 'SR'}
 
     # Report Heading
     report_heading = st.text_input("Enter Report Heading:")
@@ -370,10 +377,10 @@ def custom_report_generator(session_state):
 
     generate_button = st.button("Generate Report")
     if generate_button:
-        generate_custom_report(session_state.stats_data, stat, sort_order, selected_additional_stats, one_decimal_stats,
+        generate_custom_report(session_state.stats_data, stat, sort_order, selected_additional_stats, two_decimal_stats,
                                report_heading, highlight_color, stat_display_names)
 
-def generate_custom_report(stats_data, stat, sort_order, selected_additional_stats, one_decimal_stats,
+def generate_custom_report(stats_data, stat, sort_order, selected_additional_stats, two_decimal_stats,
                            report_heading, highlight_color, stat_display_names):
     if stat not in stats_data.columns:
         st.warning(f"The selected stat '{stat}' is not available.")
@@ -417,11 +424,9 @@ def generate_custom_report(stats_data, stat, sort_order, selected_additional_sta
         df[stat_display_names.get(stat, stat)] = f'background-color: {highlight_color}'
         return df
 
-    styled_df = report_data.style.apply(highlight_col, axis=None).set_properties(**{'text-align': 'center', 'font-size': '1.1em'}).set_table_styles(
+    st.dataframe(report_data.style.apply(highlight_col, axis=None).format({stat_display_names.get(s, s): '{:.2f}' for s in two_decimal_stats if stat_display_names.get(s, s) in report_data.columns}).set_properties(**{'text-align': 'center', 'font-size': '1.1em'}).set_table_styles(
         [{'selector': 'th', 'props': [('font-weight', 'bold'), ('background-color', '#f0f2f6'), ('font-size', '1.2em')]}]
-    )
-
-    st.dataframe(styled_df)
+    ))
 
 def player_stats_over_years(session_state):
     st.markdown("<h2 style='color: #2c3e50; font-size:32px;'>Player Stats Over Years</h2>", unsafe_allow_html=True)
@@ -454,7 +459,7 @@ def player_stats_over_years(session_state):
     # Stat selection
     default_stats = [
         "Matches", "Innings", "Runs", "High", "Not Out", "Avg",
-        "50s", "100s", "4s", "6s", "Ducks", "Catches", "Wickets",
+        "50s", "100s", "Ducks", "Catches", "Wickets", "C+RO+S",
         "Avg.1", "Econ", "SR", "Best", "Full Overs"
     ]
     stat_display_names = {
@@ -462,8 +467,7 @@ def player_stats_over_years(session_state):
         'Avg.1': 'Bowling Avg',
         'Econ': 'Bowling Econ',
         'SR': 'Bowling SR',
-        '4s': 'Fours',
-        '6s': 'Sixes'
+        'C+RO+S': 'Catches+RunOuts+Stumpings'
     }
     stat_options = [stat for stat in default_stats if stat != 'Player']
     display_stat_options = [stat_display_names.get(stat, stat) for stat in stat_options]
@@ -497,7 +501,7 @@ def player_stats_over_years(session_state):
 
 def generate_player_stats_chart(session_state, player1, player2, stat, selected_additional_stats,
                                 chart_heading, bar_color, stat_display_names):
-    one_decimal_stats = {'Avg', 'Avg.1', 'Econ', 'SR'}
+    two_decimal_stats = {'Avg', 'Avg.1', 'Econ', 'SR'}
 
     # Collect data across years for player 1
     years = []
@@ -515,8 +519,8 @@ def generate_player_stats_chart(session_state, player1, player2, stat, selected_
                         continue  # Skip NaN values
                     try:
                         value = float(value)
-                        if stat in one_decimal_stats:
-                            value = float(f"{value:.1f}")
+                        if stat in two_decimal_stats:
+                            value = float(f"{value:.2f}")
                     except (ValueError, TypeError):
                         continue  # Skip invalid values
                     years.append(sheet)
@@ -528,7 +532,7 @@ def generate_player_stats_chart(session_state, player1, player2, stat, selected_
                         # Format the value if needed
                         if pd.isna(add_value):
                             add_value = "N/A"
-                        elif add_stat in one_decimal_stats:
+                        elif add_stat in two_decimal_stats:
                             add_value = format_value(add_value)
                         additional_values.append(f"{stat_display_names.get(add_stat, add_stat)}: {add_value}")
                     additional_stats_values1.append(additional_values)
@@ -553,8 +557,8 @@ def generate_player_stats_chart(session_state, player1, player2, stat, selected_
                     else:
                         try:
                             value = float(value)
-                            if stat in one_decimal_stats:
-                                value = float(f"{value:.1f}")
+                            if stat in two_decimal_stats:
+                                value = float(f"{value:.2f}")
                         except (ValueError, TypeError):
                             value = np.nan  # Use NaN for invalid values
                     stat_values2.append(value)
@@ -565,7 +569,7 @@ def generate_player_stats_chart(session_state, player1, player2, stat, selected_
                         # Format the value if needed
                         if pd.isna(add_value):
                             add_value = "N/A"
-                        elif add_stat in one_decimal_stats:
+                        elif add_stat in two_decimal_stats:
                             add_value = format_value(add_value)
                         additional_values.append(f"{stat_display_names.get(add_stat, add_stat)}: {add_value}")
                     additional_stats_values2.append(additional_values)
@@ -636,7 +640,7 @@ def top_players_over_years(session_state):
     # Stat selection
     default_stats = [
         "Matches", "Innings", "Runs", "High", "Not Out", "Avg",
-        "50s", "100s", "4s", "6s", "Ducks", "Catches", "Wickets",
+        "50s", "100s", "Ducks", "Catches", "Wickets", "C+RO+S",
         "Avg.1", "Econ", "SR", "Best", "Full Overs"
     ]
     stat_display_names = {
@@ -644,8 +648,7 @@ def top_players_over_years(session_state):
         'Avg.1': 'Bowling Avg',
         'Econ': 'Bowling Econ',
         'SR': 'Bowling SR',
-        '4s': 'Fours',
-        '6s': 'Sixes'
+        'C+RO+S': 'Catches+RunOuts+Stumpings'
     }
     stat_options = [stat for stat in default_stats if stat != 'Player']
     display_stat_options = [stat_display_names.get(stat, stat) for stat in stat_options]
@@ -694,7 +697,7 @@ def top_players_over_years(session_state):
 
 def generate_top_players_chart(session_state, stat, order, selected_additional_stats,
                                chart_heading, title_color, bar_color, stat_display_names):
-    one_decimal_stats = {'Avg', 'Avg.1', 'Econ', 'SR'}
+    two_decimal_stats = {'Avg', 'Avg.1', 'Econ', 'SR'}
 
     # Collect data across years
     years = []
@@ -721,6 +724,12 @@ def generate_top_players_chart(session_state, stat, order, selected_additional_s
             if df_filtered.empty:
                 continue
 
+            # Convert stat to numeric
+            df_filtered[stat] = pd.to_numeric(df_filtered[stat], errors='coerce')
+            df_filtered.dropna(subset=[stat], inplace=True)
+            if df_filtered.empty:
+                continue
+
             # Find the top player based on the stat
             if order == "Most":
                 idx = df_filtered[stat].idxmax()
@@ -729,7 +738,10 @@ def generate_top_players_chart(session_state, stat, order, selected_additional_s
 
             top_player = df_filtered.loc[idx, 'Player']
             top_value = df_filtered.loc[idx, stat]
+            if pd.isna(top_value):
+                continue  # Skip if top_value is NaN
             years.append(sheet)
+            top_value = format_value(top_value) if stat in two_decimal_stats else top_value
             stat_values.append(top_value)
             player_names.append(top_player)
 
@@ -740,7 +752,7 @@ def generate_top_players_chart(session_state, stat, order, selected_additional_s
                 # Format the value if needed
                 if pd.isna(add_value):
                     add_value = "N/A"
-                elif add_stat in one_decimal_stats:
+                elif add_stat in two_decimal_stats:
                     add_value = format_value(add_value)
                 additional_values.append(f"{stat_display_names.get(add_stat, add_stat)}: {add_value}")
             additional_stats_values.append(additional_values)
@@ -758,7 +770,14 @@ def generate_top_players_chart(session_state, stat, order, selected_additional_s
         ax.set_title(f"Top Players by {stat_display_names.get(stat, stat)} ({order}) Over the Years", fontweight='bold', color=title_color, fontsize=16)
     ax.tick_params(axis='x', rotation=45, labelsize=12)
 
-    max_stat_value = max(stat_values) if stat_values else 0
+    # Convert stat_values to numeric for y-axis scaling
+    numeric_stat_values = []
+    for val in stat_values:
+        try:
+            numeric_stat_values.append(float(val))
+        except ValueError:
+            numeric_stat_values.append(0)
+    max_stat_value = max(numeric_stat_values) if numeric_stat_values else 0
 
     # Adjust y-limit to make space for annotations
     ax.set_ylim(0, max_stat_value * 1.25)
