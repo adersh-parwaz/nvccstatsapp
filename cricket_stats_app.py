@@ -9,6 +9,33 @@ import numpy as np
 logging.basicConfig(filename='app.log', level=logging.ERROR,
                     format='%(asctime)s %(levelname)s %(message)s')
 
+# Add color options (Moved to global scope)
+highlight_colors = {
+    "Light Green": "#90EE90",
+    "Light Blue": "#ADD8E6",
+    "Light Yellow": "#FFFFE0",
+    "Light Pink": "#FFB6C1",
+    "Light Orange": "#FFD580"
+}
+
+bar_colors = {
+    "Blue": "#3498db",
+    "Green": "#2ecc71",
+    "Red": "#e74c3c",
+    "Purple": "#9b59b6",
+    "Orange": "#e67e22",
+    "Gray": "#95a5a6"
+}
+
+title_colors = {
+    "Black": "#000000",
+    "Blue": "#0000FF",
+    "Red": "#FF0000",
+    "Green": "#008000",
+    "Purple": "#800080",
+    "Orange": "#FFA500"
+}
+
 def main():
     st.set_page_config(page_title="NVCC Player Stats", layout="wide")
     
@@ -49,33 +76,6 @@ def main():
 
     # Stats that need to be formatted to two decimal places
     two_decimal_stats = {'Avg', 'Avg.1', 'Econ', 'SR'}
-
-    # Add color options
-    highlight_colors = {
-        "Light Green": "#90EE90",
-        "Light Blue": "#ADD8E6",
-        "Light Yellow": "#FFFFE0",
-        "Light Pink": "#FFB6C1",
-        "Light Orange": "#FFD580"
-    }
-
-    bar_colors = {
-        "Blue": "#3498db",
-        "Green": "#2ecc71",
-        "Red": "#e74c3c",
-        "Purple": "#9b59b6",
-        "Orange": "#e67e22",
-        "Gray": "#95a5a6"
-    }
-
-    title_colors = {
-        "Black": "#000000",
-        "Blue": "#0000FF",
-        "Red": "#FF0000",
-        "Green": "#008000",
-        "Purple": "#800080",
-        "Orange": "#FFA500"
-    }
 
     st.sidebar.header("Navigation")
 
@@ -427,14 +427,16 @@ def player_stats_over_years(session_state):
 
     # Get unique players across all sheets
     all_players = set()
-    for sheet in session_state.excel_sheets:
+    for sheet in st.session_state.excel_sheets:
         if sheet != "ALL TIME":
-            df = session_state.excel_file.parse(sheet_name=sheet)
-            # Convert to strings and remove any leading/trailing whitespace
-            players = df['Player'].astype(str).str.strip()
-            # Remove any empty or NaN values
-            players = players[players.notna() & (players != '')]
-            all_players.update(players)
+            df = st.session_state.excel_file.parse(sheet_name=sheet)
+            df.columns = df.columns.str.strip()
+            if 'Player' in df.columns:
+                # Convert to strings and remove any leading/trailing whitespace
+                players = df['Player'].astype(str).str.strip()
+                # Remove any empty or NaN values
+                players = players[players.notna() & (players != '')]
+                all_players.update(players)
 
     # Convert to list and sort (after ensuring all items are strings)
     all_players = sorted(list(all_players))
@@ -493,9 +495,9 @@ def generate_player_stats_chart(session_state, player1, player2, stat, selected_
     years = []
     stat_values1 = []
     additional_stats_values1 = []
-    for sheet in session_state.excel_sheets:
+    for sheet in st.session_state.excel_sheets:
         if sheet != "ALL TIME":
-            df = session_state.excel_file.parse(sheet_name=sheet)
+            df = st.session_state.excel_file.parse(sheet_name=sheet)
             df.columns = df.columns.str.strip()
             if 'Player' in df.columns and stat in df.columns:
                 player_data = df[df['Player'] == player1]
@@ -532,7 +534,7 @@ def generate_player_stats_chart(session_state, player1, player2, stat, selected_
         additional_stats_values2 = []
         # Using the same 'years' list to ensure alignment
         for sheet in years:
-            df = session_state.excel_file.parse(sheet_name=sheet)
+            df = st.session_state.excel_file.parse(sheet_name=sheet)
             df.columns = df.columns.str.strip()
             if 'Player' in df.columns and stat in df.columns:
                 player_data = df[df['Player'] == player2]
@@ -591,7 +593,7 @@ def generate_player_stats_chart(session_state, player1, player2, stat, selected_
 
     ax.legend(fontsize=12)
 
-    max_stat_value = max(stat_values1 + (stat_values2 if player2 else [])) if stat_values1 else 0
+    max_stat_value = max([v for v in stat_values1 if not pd.isna(v)] + ([v for v in stat_values2 if not pd.isna(v)] if player2 else [])) if stat_values1 else 0
 
     # Adjust y-limit to make space for annotations
     ax.set_ylim(0, max_stat_value * 1.25)
@@ -599,6 +601,8 @@ def generate_player_stats_chart(session_state, player1, player2, stat, selected_
     # Annotate bars with main stat value and additional stats
     def annotate_bars(rects, stat_values, additional_stats_values):
         for rect, main_value, add_values in zip(rects, stat_values, additional_stats_values):
+            if pd.isna(main_value):
+                continue
             height = rect.get_height()
             y_offset = height + (max_stat_value * 0.01)
             # Annotate main value
@@ -754,7 +758,10 @@ def generate_top_players_chart(session_state, stat, order, selected_additional_s
 
     # Annotate bars with player name, main stat value, and additional stats
     for bar, main_value, name, add_values in zip(bars, stat_values, player_names, additional_stats_values):
-        height = bar.get_height()
+        try:
+            height = float(main_value)
+        except ValueError:
+            height = 0
         y_offset = height + (max_stat_value * 0.01)
         # Annotate player name
         ax.text(bar.get_x() + bar.get_width()/2., y_offset,
