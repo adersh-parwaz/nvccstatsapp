@@ -142,11 +142,11 @@ def apply_custom_styles():
         <style>
         /* Main content area */
         [data-testid="stAppViewContainer"] {
-            background-color: #d3d3d3;
+            background-color: #ffffff;
         }
         /* Sidebar */
         [data-testid="stSidebar"] {
-            background-color: #bfbfbf;
+            background-color: #f0f2f6;
         }
         /* Scrollbar */
         ::-webkit-scrollbar {
@@ -307,7 +307,7 @@ def display_stats(stats1, stats2, stats3, selected_stats, stat_display_names, tw
 
     # Apply styling
     st.table(df_display.style.set_properties(**{'text-align': 'center', 'font-size': '1.2em'}).set_table_styles(
-        [{'selector': 'th', 'props': [('font-weight', 'bold'), ('background-color', '#f0f2f6'), ('font-size', '1.2em')]}]
+        [{'selector': 'th', 'props': [('font-weight', 'bold'), ('font-size', '1.2em')]}]
     ))
 
 def format_value(value):
@@ -365,13 +365,6 @@ def custom_report_generator(session_state):
     selected_additional_stats = [reverse_stat_display_names.get(s, s) for s in selected_additional_stats if s != display_stat]
 
     # Highlight color selection
-    highlight_colors = {
-        "Light Green": "#90EE90",
-        "Light Blue": "#ADD8E6",
-        "Light Yellow": "#FFFFE0",
-        "Light Pink": "#FFB6C1",
-        "Light Orange": "#FFD580"
-    }
     highlight_color_name = st.selectbox("Select Highlight Color:", list(highlight_colors.keys()))
     highlight_color = highlight_colors[highlight_color_name]
 
@@ -424,9 +417,10 @@ def generate_custom_report(stats_data, stat, sort_order, selected_additional_sta
         df[stat_display_names.get(stat, stat)] = f'background-color: {highlight_color}'
         return df
 
-    st.dataframe(report_data.style.apply(highlight_col, axis=None).format({stat_display_names.get(s, s): '{:.2f}' for s in two_decimal_stats if stat_display_names.get(s, s) in report_data.columns}).set_properties(**{'text-align': 'center', 'font-size': '1.1em'}).set_table_styles(
-        [{'selector': 'th', 'props': [('font-weight', 'bold'), ('background-color', '#f0f2f6'), ('font-size', '1.2em')]}]
-    ))
+    st.dataframe(report_data.style.apply(highlight_col, axis=None)
+                 .format({stat_display_names.get(s, s): '{:.2f}' for s in two_decimal_stats if stat_display_names.get(s, s) in report_data.columns})
+                 .set_properties(**{'text-align': 'center', 'font-size': '1.1em'})
+                 .set_table_styles([{'selector': 'th', 'props': [('font-weight', 'bold'), ('font-size', '1.2em')]}]))
 
 def player_stats_over_years(session_state):
     st.markdown("<h2 style='color: #2c3e50; font-size:32px;'>Player Stats Over Years</h2>", unsafe_allow_html=True)
@@ -483,14 +477,6 @@ def player_stats_over_years(session_state):
     chart_heading = st.text_input("Enter Chart Title:")
 
     # Bar color selection
-    bar_colors = {
-        "Blue": "#3498db",
-        "Green": "#2ecc71",
-        "Red": "#e74c3c",
-        "Purple": "#9b59b6",
-        "Orange": "#e67e22",
-        "Gray": "#95a5a6"
-    }
     bar_color_name = st.selectbox("Select Bar Color:", list(bar_colors.keys()))
     bar_color = bar_colors[bar_color_name]
 
@@ -663,26 +649,10 @@ def top_players_over_years(session_state):
     chart_heading = st.text_input("Enter Chart Title:")
 
     # Title color selection
-    title_colors = {
-        "Black": "#000000",
-        "Blue": "#0000FF",
-        "Red": "#FF0000",
-        "Green": "#008000",
-        "Purple": "#800080",
-        "Orange": "#FFA500"
-    }
     title_color_name = st.selectbox("Select Title Color:", list(title_colors.keys()))
     title_color = title_colors[title_color_name]
 
     # Bar color selection
-    bar_colors = {
-        "Blue": "#3498db",
-        "Green": "#2ecc71",
-        "Red": "#e74c3c",
-        "Purple": "#9b59b6",
-        "Orange": "#e67e22",
-        "Gray": "#95a5a6"
-    }
     bar_color_name = st.selectbox("Select Bar Color:", list(bar_colors.keys()))
     bar_color = bar_colors[bar_color_name]
 
