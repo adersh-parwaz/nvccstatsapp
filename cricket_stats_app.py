@@ -78,6 +78,33 @@ def main():
         "Orange": "#FFA500"
     }
 
+    # Add color options
+    highlight_colors = {
+        "Light Green": "#90EE90",
+        "Light Blue": "#ADD8E6",
+        "Light Yellow": "#FFFFE0",
+        "Light Pink": "#FFB6C1",
+        "Light Orange": "#FFD580"
+    }
+
+    bar_colors = {
+        "Blue": "#3498db",
+        "Green": "#2ecc71",
+        "Red": "#e74c3c",
+        "Purple": "#9b59b6",
+        "Orange": "#e67e22",
+        "Gray": "#95a5a6"
+    }
+
+    title_colors = {
+        "Black": "#000000",
+        "Blue": "#0000FF",
+        "Red": "#FF0000",
+        "Green": "#008000",
+        "Purple": "#800080",
+        "Orange": "#FFA500"
+    }
+
     st.sidebar.header("Navigation")
 
     # Load the Excel file directly from the file system
