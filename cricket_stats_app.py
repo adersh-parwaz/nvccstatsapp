@@ -146,7 +146,7 @@ def apply_custom_styles():
             font-size: 16px;
         }
 
-        /* Gradient background for both modes */
+        /* Lighter burgundy gradient background for both modes */
         body, .block-container {
             margin: 0;
             padding: 0;
@@ -154,7 +154,7 @@ def apply_custom_styles():
 
         @media (prefers-color-scheme: light) {
             body, .block-container {
-                background: linear-gradient(to bottom right, #B22222, #800020) !important;
+                background: linear-gradient(to bottom right, #BD2C2C, #9A2030) !important;
                 color: #000000 !important;
             }
             .dataframe th, .dataframe td {
@@ -168,7 +168,7 @@ def apply_custom_styles():
 
         @media (prefers-color-scheme: dark) {
             body, .block-container {
-                background: linear-gradient(to bottom right, #4B0000, #300000) !important;
+                background: linear-gradient(to bottom right, #5C0000, #400000) !important;
                 color: #ffffff !important;
             }
             .dataframe th, .dataframe td {
@@ -566,10 +566,9 @@ def generate_player_stats_chart(session_state, player1, player2, stat, selected_
                         if stat in one_decimal_stats:
                             value = float(f"{value:.1f}")
                     except (ValueError, TypeError):
-                        continue  # Skip invalid values
+                        continue
                     years.append(sheet)
                     stat_values1.append(value)
-                    # Collect additional stats
                     additional_values = []
                     for add_stat in selected_additional_stats:
                         add_value = player_data.iloc[0][add_stat] if add_stat in player_data.columns else "N/A"
@@ -617,17 +616,13 @@ def generate_player_stats_chart(session_state, player1, player2, stat, selected_
                     stat_values2.append(np.nan)
                     additional_stats_values2.append([])
 
-    # Generate the plot
     plt.rcParams.update({'font.size': 12})
     fig, ax = plt.subplots(figsize=(10, 6))
 
-    x_indices = np.arange(len(years))  # the label locations
-    width = 0.35  # the width of the bars
+    x_indices = np.arange(len(years))
+    width = 0.35
 
-    # Plot bars for player 1
     rects1 = ax.bar(x_indices - width/2, stat_values1, width, label=player1, color=bar_color)
-
-    # Plot bars for player 2 if selected
     if player2:
         rects2 = ax.bar(x_indices + width/2, stat_values2, width, label=player2, color='orange')
 
