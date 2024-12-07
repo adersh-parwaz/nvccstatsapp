@@ -15,7 +15,7 @@ def main():
     # Apply custom CSS styles
     apply_custom_styles()
     
-    st.markdown("<h1 style='text-align: center; font-size:48px;'>NVCC Player Stats</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; color: #FFA500; font-size:48px;'>NVCC Player Stats</h1>", unsafe_allow_html=True)
 
     # Initialize session state variables
     if 'excel_file' not in st.session_state:
@@ -141,45 +141,6 @@ def main():
 def apply_custom_styles():
     st.markdown("""
         <style>
-        body, .block-container {
-            font-family: Arial, sans-serif;
-            font-size: 16px;
-        }
-
-        /* Lighter burgundy gradient background for both modes */
-        body, .block-container {
-            margin: 0;
-            padding: 0;
-        }
-
-        @media (prefers-color-scheme: light) {
-            body, .block-container {
-                background: linear-gradient(to bottom right, #BD2C2C, #9A2030) !important;
-                color: #000000 !important;
-            }
-            .dataframe th, .dataframe td {
-                background: rgba(255, 255, 255, 0.9)!important;
-                color: #000000!important;
-            }
-            h1, h2, h3, h4, h5, h6, label {
-                color: #000000 !important;
-            }
-        }
-
-        @media (prefers-color-scheme: dark) {
-            body, .block-container {
-                background: linear-gradient(to bottom right, #5C0000, #400000) !important;
-                color: #ffffff !important;
-            }
-            .dataframe th, .dataframe td {
-                background: rgba(0, 0, 0, 0.7)!important;
-                color: #ffffff!important;
-            }
-            h1, h2, h3, h4, h5, h6, label {
-                color: #ffffff !important;
-            }
-        }
-
         /* Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
@@ -193,49 +154,40 @@ def apply_custom_styles():
         ::-webkit-scrollbar-thumb:hover {
             background: #555; 
         }
-
-        /* Headers font-size adjustments */
+        /* Headers */
         h1, h2, h3, h4, h5, h6 {
             font-size: 1.5em !important;
         }
-
         /* Sidebar */
         .sidebar .sidebar-content {
-            background-color: rgba(255,255,255,0.1);
+            background-color: #f0f2f6;
         }
-
         /* Buttons */
         .stButton>button {
             color: white;
             background-color: #3498db;
             border-radius: 5px;
             font-size: 16px;
-            border: none;
         }
-
         /* Success messages */
         .st-bf {
             background-color: #d4edda !important;
             border-color: #c3e6cb !important;
             color: #155724 !important;
         }
-
         /* Increase font size of input labels */
         label {
             font-size: 1.2em;
         }
-
-        /* Table styling */
+        /* Table font size */
         .dataframe th, .dataframe td {
             font-size: 1.1em;
-            text-align: center;
         }
-
         </style>
         """, unsafe_allow_html=True)
 
 def player_comparison(session_state):
-    st.markdown(f"<h2 style='font-size:32px;'>{session_state.year_var} Career Analysis</h2>", unsafe_allow_html=True)
+    st.markdown(f"<h2 style='color: #2c3e50; font-size:32px;'>{session_state.year_var} Career Analysis</h2>", unsafe_allow_html=True)
 
     stat_display_names = {
         'Avg': 'Batting Avg',
@@ -346,8 +298,8 @@ def display_stats(stats1, stats2, stats3, selected_stats, stat_display_names, on
     df_display = pd.DataFrame(data, index=headers).transpose()
 
     # Apply styling
-    st.table(df_display.style.set_properties(**{'text-align': 'center', 'font-size': '1.2em', 'color': 'inherit'}).set_table_styles(
-        [{'selector': 'th', 'props': [('font-weight', 'bold'), ('font-size', '1.2em')]}]
+    st.table(df_display.style.set_properties(**{'text-align': 'center', 'font-size': '1.2em'}).set_table_styles(
+        [{'selector': 'th', 'props': [('font-weight', 'bold'), ('background-color', '#f0f2f6'), ('font-size', '1.2em')]}]
     ))
 
 def format_value(value):
@@ -374,7 +326,7 @@ def get_best_stat(stats):
         return "N/A"
 
 def custom_report_generator(session_state):
-    st.markdown("<h2 style='font-size:32px;'>Custom Report Generator</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color: #2c3e50; font-size:32px;'>Custom Report Generator</h2>", unsafe_allow_html=True)
 
     stat_display_names = {
         'Avg': 'Batting Avg',
@@ -448,9 +400,9 @@ def generate_custom_report(stats_data, stat, sort_order, selected_additional_sta
 
     # Display the report
     if report_heading:
-        st.markdown(f"<h3 style='font-size:28px;'>{report_heading}</h3>", unsafe_allow_html=True)
+        st.markdown(f"<h3 style='color: #2c3e50; font-size:28px;'>{report_heading}</h3>", unsafe_allow_html=True)
     else:
-        st.markdown("<h3 style='font-size:28px;'>Custom Report</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #2c3e50; font-size:28px;'>Custom Report</h3>", unsafe_allow_html=True)
 
     # Display the report in tabular format with ranking
     report_data.insert(0, 'Rank', report_data.index + 1)
@@ -465,14 +417,14 @@ def generate_custom_report(stats_data, stat, sort_order, selected_additional_sta
         df[stat_display_names.get(stat, stat)] = f'background-color: {highlight_color}'
         return df
 
-    styled_df = report_data.style.apply(highlight_col, axis=None).set_properties(**{'text-align': 'center', 'font-size': '1.1em', 'color': 'inherit'}).set_table_styles(
-        [{'selector': 'th', 'props': [('font-weight', 'bold'), ('font-size', '1.2em')]}]
+    styled_df = report_data.style.apply(highlight_col, axis=None).set_properties(**{'text-align': 'center', 'font-size': '1.1em'}).set_table_styles(
+        [{'selector': 'th', 'props': [('font-weight', 'bold'), ('background-color', '#f0f2f6'), ('font-size', '1.2em')]}]
     )
 
     st.dataframe(styled_df)
 
 def player_stats_over_years(session_state):
-    st.markdown("<h2 style='font-size:32px;'>Player Stats Over Years</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color: #2c3e50; font-size:32px;'>Player Stats Over Years</h2>", unsafe_allow_html=True)
 
     # Get unique players across all sheets
     all_players = set()
@@ -566,12 +518,14 @@ def generate_player_stats_chart(session_state, player1, player2, stat, selected_
                         if stat in one_decimal_stats:
                             value = float(f"{value:.1f}")
                     except (ValueError, TypeError):
-                        continue
+                        continue  # Skip invalid values
                     years.append(sheet)
                     stat_values1.append(value)
+                    # Collect additional stats
                     additional_values = []
                     for add_stat in selected_additional_stats:
                         add_value = player_data.iloc[0][add_stat] if add_stat in player_data.columns else "N/A"
+                        # Format the value if needed
                         if pd.isna(add_value):
                             add_value = "N/A"
                         elif add_stat in one_decimal_stats:
@@ -586,6 +540,7 @@ def generate_player_stats_chart(session_state, player1, player2, stat, selected_
     if player2:
         stat_values2 = []
         additional_stats_values2 = []
+        # Using the same 'years' list to ensure alignment
         for sheet in years:
             df = session_state.excel_file.parse(sheet_name=sheet)
             df.columns = df.columns.str.strip()
@@ -594,18 +549,20 @@ def generate_player_stats_chart(session_state, player1, player2, stat, selected_
                 if not player_data.empty:
                     value = player_data.iloc[0][stat]
                     if pd.isna(value):
-                        value = np.nan
+                        value = np.nan  # Use NaN to maintain alignment
                     else:
                         try:
                             value = float(value)
                             if stat in one_decimal_stats:
                                 value = float(f"{value:.1f}")
                         except (ValueError, TypeError):
-                            value = np.nan
+                            value = np.nan  # Use NaN for invalid values
                     stat_values2.append(value)
+                    # Collect additional stats
                     additional_values = []
                     for add_stat in selected_additional_stats:
                         add_value = player_data.iloc[0][add_stat] if add_stat in player_data.columns else "N/A"
+                        # Format the value if needed
                         if pd.isna(add_value):
                             add_value = "N/A"
                         elif add_stat in one_decimal_stats:
@@ -613,24 +570,30 @@ def generate_player_stats_chart(session_state, player1, player2, stat, selected_
                         additional_values.append(f"{stat_display_names.get(add_stat, add_stat)}: {add_value}")
                     additional_stats_values2.append(additional_values)
                 else:
+                    # If player data is missing for the year, append NaN
                     stat_values2.append(np.nan)
                     additional_stats_values2.append([])
-
+    # Generate the plot
     plt.rcParams.update({'font.size': 12})
     fig, ax = plt.subplots(figsize=(10, 6))
 
-    x_indices = np.arange(len(years))
-    width = 0.35
+    x_indices = np.arange(len(years))  # the label locations
+    width = 0.35  # the width of the bars
 
+    # Plot bars for player 1
     rects1 = ax.bar(x_indices - width/2, stat_values1, width, label=player1, color=bar_color)
+
+    # Plot bars for player 2 if selected
     if player2:
         rects2 = ax.bar(x_indices + width/2, stat_values2, width, label=player2, color='orange')
 
+    # Add some text for labels, title and custom x-axis tick labels, etc.
     ax.set_xlabel('Year', fontsize=14)
     ax.set_ylabel(stat_display_names.get(stat, stat), fontsize=14)
     ax.set_xticks(x_indices)
     ax.set_xticklabels(years, rotation=45, fontsize=12)
 
+    # Use custom heading if provided
     if chart_heading:
         ax.set_title(chart_heading, fontweight='bold', fontsize=16)
     else:
@@ -639,15 +602,20 @@ def generate_player_stats_chart(session_state, player1, player2, stat, selected_
     ax.legend(fontsize=12)
 
     max_stat_value = max(stat_values1 + (stat_values2 if player2 else [])) if stat_values1 else 0
+
+    # Adjust y-limit to make space for annotations
     ax.set_ylim(0, max_stat_value * 1.25)
 
+    # Annotate bars with main stat value and additional stats
     def annotate_bars(rects, stat_values, additional_stats_values):
         for rect, main_value, add_values in zip(rects, stat_values, additional_stats_values):
             height = rect.get_height()
             y_offset = height + (max_stat_value * 0.01)
+            # Annotate main value
             ax.text(rect.get_x() + rect.get_width()/2., y_offset,
                     f'{main_value}', ha='center', va='bottom', fontsize=10, fontweight='bold')
             y_offset += (max_stat_value * 0.03)
+            # Annotate additional stats
             for add_value in add_values:
                 ax.text(rect.get_x() + rect.get_width()/2., y_offset,
                         f'({add_value})', ha='center', va='bottom', fontsize=8)
@@ -657,11 +625,13 @@ def generate_player_stats_chart(session_state, player1, player2, stat, selected_
     if player2:
         annotate_bars(rects2, stat_values2, additional_stats_values2)
 
+    # Adjust layout to prevent clipping
     fig.tight_layout()
+
     st.pyplot(fig)
 
 def top_players_over_years(session_state):
-    st.markdown("<h2 style='font-size:32px;'>Top Players Over Years</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color: #2c3e50; font-size:32px;'>Top Players Over Years</h2>", unsafe_allow_html=True)
 
     # Stat selection
     default_stats = [
@@ -737,16 +707,21 @@ def generate_top_players_chart(session_state, stat, order, selected_additional_s
             df = session_state.excel_file.parse(sheet_name=sheet)
             df.columns = df.columns.str.strip()
 
+            # Check if required columns exist
             if 'Player' not in df.columns or stat not in df.columns:
                 continue
 
+            # Filter columns that exist in the DataFrame
             available_additional_stats = [s for s in selected_additional_stats if s in df.columns]
+
+            # Create filtered DataFrame with only available columns
             columns_to_use = ['Player', stat] + available_additional_stats
             df_filtered = df[columns_to_use].dropna(subset=[stat])
 
             if df_filtered.empty:
                 continue
 
+            # Find the top player based on the stat
             if order == "Most":
                 idx = df_filtered[stat].idxmax()
             else:
@@ -758,9 +733,11 @@ def generate_top_players_chart(session_state, stat, order, selected_additional_s
             stat_values.append(top_value)
             player_names.append(top_player)
 
+            # Collect additional stats
             additional_values = []
             for add_stat in available_additional_stats:
                 add_value = df_filtered.loc[idx, add_stat]
+                # Format the value if needed
                 if pd.isna(add_value):
                     add_value = "N/A"
                 elif add_stat in one_decimal_stats:
@@ -768,11 +745,13 @@ def generate_top_players_chart(session_state, stat, order, selected_additional_s
                 additional_values.append(f"{stat_display_names.get(add_stat, add_stat)}: {add_value}")
             additional_stats_values.append(additional_values)
 
+    # Generate the plot
     plt.rcParams.update({'font.size': 12})
     fig, ax = plt.subplots(figsize=(10, 6))
     bars = ax.bar(years, stat_values, color=bar_color)
     ax.set_xlabel('Year', fontsize=14)
     ax.set_ylabel(stat_display_names.get(stat, stat), fontsize=14)
+    # Use custom heading if provided
     if chart_heading:
         ax.set_title(chart_heading, fontweight='bold', color=title_color, fontsize=16)
     else:
@@ -780,23 +759,31 @@ def generate_top_players_chart(session_state, stat, order, selected_additional_s
     ax.tick_params(axis='x', rotation=45, labelsize=12)
 
     max_stat_value = max(stat_values) if stat_values else 0
+
+    # Adjust y-limit to make space for annotations
     ax.set_ylim(0, max_stat_value * 1.25)
 
+    # Annotate bars with player name, main stat value, and additional stats
     for bar, main_value, name, add_values in zip(bars, stat_values, player_names, additional_stats_values):
         height = bar.get_height()
         y_offset = height + (max_stat_value * 0.01)
+        # Annotate player name
         ax.text(bar.get_x() + bar.get_width()/2., y_offset,
                 f'{name}', ha='center', va='bottom', fontsize=10, fontweight='bold')
         y_offset += (max_stat_value * 0.03)
+        # Annotate main value
         ax.text(bar.get_x() + bar.get_width()/2., y_offset,
                 f'{main_value}', ha='center', va='bottom', fontsize=10, fontweight='bold')
         y_offset += (max_stat_value * 0.03)
+        # Annotate additional stats
         for add_value in add_values:
             ax.text(bar.get_x() + bar.get_width()/2., y_offset,
                     f'({add_value})', ha='center', va='bottom', fontsize=8)
             y_offset += (max_stat_value * 0.03)
 
+    # Adjust layout to prevent clipping of tick-labels
     fig.tight_layout()
+
     st.pyplot(fig)
 
 if __name__ == "__main__":
